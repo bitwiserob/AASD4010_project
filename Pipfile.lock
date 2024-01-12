@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "712fdc179aa53059310e5c8829a8383460a306fede71acd3f01550b4f523b042"
+            "sha256": "f6c87bbcf8bab1c280d2a2c3be52527af05c90f16dd282571027c4e8f6fd9986"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -749,6 +749,15 @@
             "index": "pypi",
             "markers": "python_version >= '3.9'",
             "version": "==2.1.4"
+        },
+        "pandas-datareader": {
+            "hashes": [
+                "sha256:0b95ff3635bc3ee1a6073521b557ab0e3c39d219f4a3b720b6b0bc6e8cdb4bb7",
+                "sha256:9fc3c63d39bc0c10c2683f1c6d503ff625020383e38f6cbe14134826b454d5a6"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.6'",
+            "version": "==0.10.0"
         },
         "peewee": {
             "hashes": [

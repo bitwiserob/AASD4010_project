@@ -23,6 +23,7 @@ networkx==3.2.1; python_version >= '3.9'
 numpy==1.26.3; python_version >= '3.9'
 packaging==23.2; python_version >= '3.7'
 pandas==2.1.4; python_version >= '3.9'
+pandas-datareader==0.10.0; python_version >= '3.6'
 peewee==3.17.0
 pillow==10.2.0; python_version >= '3.8'
 pyparsing==3.1.1; python_full_version >= '3.6.8'
