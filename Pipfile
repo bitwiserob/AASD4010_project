@@ -51,7 +51,6 @@ webencodings = "==0.5.1"
 yfinance = "==0.2.35"
 pandas-datareader = "*"
 tensorflow = "*"
-sns = "*"
 
 [dev-packages]
 ipykernel = "*"
