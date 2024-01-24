@@ -24,9 +24,7 @@ def single_preprocessing(ticker='SPLK', drop_col='Close'):
     #Now let's scale our data
     #First let's split data into X and Y
     X = df.loc[:, ['Open', 'High', 'Low', 'Volume']]
-    y = df['Adj Close']
+    y = np.array(df['Adj Close'])
     scaler = MinMaxScaler() #create scaler object
     scaled_data = scaler.fit_transform(X) #fit transform data
-    scaled_data = scaled_data[0:-1] #shift features and observations so that we are predicting the next day adj close value
-    y = y[1:]
-    return scaled_data, y
+    return scaled_data, y, ticker
