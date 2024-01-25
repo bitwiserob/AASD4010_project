@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import datetime as dt
 from sklearn.preprocessing import MinMaxScaler
-def single_preprocessing(ticker='SPLK', drop_col='Close'):
-
+def single_preprocessing(ticker='SPLK', drop_col='Close', delay=15, lag=0):
     df = pd.read_pickle("./data/data_pkls/nasdaq100.pkl") #read data
     #Filter dataframe by this specific ticker
     df = df[ticker]
@@ -24,7 +23,16 @@ def single_preprocessing(ticker='SPLK', drop_col='Close'):
     #Now let's scale our data
     #First let's split data into X and Y
     X = df.loc[:, ['Open', 'High', 'Low', 'Volume']]
-    y = np.array(df['Adj Close'])
+    y = df['Adj Close']
     scaler = MinMaxScaler() #create scaler object
     scaled_data = scaler.fit_transform(X) #fit transform data
-    return scaled_data, y, ticker
+    #Split data into samples and reshape X
+    samples = [ scaled_data[i:i+delay] for i in range(0, (y.shape[0]), delay)]
+    if len(samples[-1] < delay):
+        samples = np.array(samples[:-1])
+    else:
+        samples = np.array(samples)
+    #Reshape y target also
+    new_y = [ y[i+delay+lag] for i in range(0, (y.shape[0]-(delay+lag)), delay)]
+    new_y = np.array(new_y)
+    return samples, new_y, ticker, delay, lag
