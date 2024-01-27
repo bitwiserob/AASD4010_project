@@ -7,50 +7,11 @@ from keras import layers
 from keras.optimizers import RMSprop
 from keras import optimizers
 from keras.layers import Dropout
-from keras.utils.vis_utils import plot_model
-
 import matplotlib.pyplot as plt
 import numpy as np
+from scikeras.wrappers import KerasRegressor
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
-
-def preprocess_data(ticker='DXCM', delay=5, lag=0):
-    """
-    Preprocesses the data for the LSTM model.
-
-    Parameters:
-    ticker (str): The stock ticker symbol.
-    delay (int): The delay parameter for preprocessing.
-    lag (int): The lag parameter for preprocessing.
-
-    Returns:
-    tuple: Processed X, y data and other necessary information.
-    """
-    # Here, we'll insert the existing preprocessing logic from the original function
-    # ...
-    X, y, ticker, delay, lag = single_preprocessing(ticker=ticker, delay=delay, lag=lag)
-
-    return X, y, ticker, delay, lag
-
-def build_lstm_model(input_shape, units=70, dropout_rate=0.2):
-    """
-    Builds and returns an LSTM model.
-
-    Parameters:
-    input_shape (tuple): The shape of the input data.
-    units (int): The number of units in each LSTM layer.
-    dropout_rate (float): The dropout rate for regularization.
-
-    Returns:
-    Sequential: The constructed LSTM model.
-    """
-    lstm_model = Sequential()
-    lstm_model.add(layers.LSTM(units=units, return_sequences=True, input_shape=input_shape, activation="tanh"))
-    lstm_model.add(Dropout(dropout_rate))
-    lstm_model.add(layers.LSTM(units=units, return_sequences=False, activation="tanh"))
-    lstm_model.add(Dropout(dropout_rate))
-    lstm_model.add(layers.Dense(1))  # No activation function for regression
-
-    return lstm_model
 
 
 def single_ticker_LSTM_regression(ticker='DXCM', delay=5, lag=0):
