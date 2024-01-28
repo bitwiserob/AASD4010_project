@@ -162,10 +162,8 @@ def lstm_hyperparameter_tuning(X_train, y_train, param_grid, n_iter=None):
     """
     # Define a function to create a model (needed for KerasClassifier or KerasRegressor)
     def create_model(units=50, dropout_rate=0.2, optimizer='adam'):
-        model = Sequential()
-        model.add(layers.LSTM(units=units, activation='tanh', input_shape=(X_train.shape[1], X_train.shape[2])))
-        model.add(Dropout(dropout_rate))
-        model.add(layers.Dense(1))
+        # Use the build_lstm_model function with dynamic parameters
+        model = build_lstm_model(input_shape=(X_train.shape[1], X_train.shape[2]), units=units, dropout_rate=dropout_rate)
         model.compile(optimizer=optimizer, loss='mean_squared_error')
         return model
 
@@ -183,13 +181,6 @@ def lstm_hyperparameter_tuning(X_train, y_train, param_grid, n_iter=None):
 
     return search_result.best_params_, search_result.best_estimator_
 
-# # Example usage
-# param_grid = {
-#     'units': [50, 100, 150],
-#     'dropout_rate': [0.2, 0.3, 0.4],
-#     'optimizer': ['adam', 'sgd']
-# }
-# best_params, best_model = lstm_hyperparameter_tuning(X_train, y_train, param_grid)
 
 
 def demonstrate_lstm_pipeline(ticker='DXCM', delay=5, lag=0, units=70, dropout_rate=0.2, epochs=190, batch_size=30):
@@ -269,3 +260,5 @@ def check_dimensions_and_split_data(X, y, test_size=0.2, val_size=0.2):
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=val_size, random_state=42)
 
     return X_train, X_test, y_train, y_test, X_val, y_val
+
+
