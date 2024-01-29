@@ -52,6 +52,10 @@ yfinance = "==0.2.35"
 pandas-datareader = "*"
 scikeras = {extras = ["tensorflow-cpu"], version = "*"}
 pydot = "*"
+statsmodels = "*"
+dash = "*"
+dash-bootstrap-components = "*"
+plotly = "*"
 
 [dev-packages]
 ipykernel = "*"
