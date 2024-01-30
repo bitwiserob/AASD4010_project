@@ -10,11 +10,6 @@ import dash
 from  models.Stock import Stock
 app = Dash(__name__,external_stylesheets=[dbc.themes.DARKLY,'./assets/custom.css'],use_pages=True)
 
-# List of tickers and features
-tickers = ['AAPL', 'GOOG', 'MSFT']  # Replace with your list of tickers
-features = ['SMA', 'EMA']  # Add other features as needed
-
-
 navbar = dbc.NavbarSimple(
     brand="Stock Dashboard",
     brand_href="#",

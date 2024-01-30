@@ -3,17 +3,12 @@ from dash import Dash, html, dcc, callback, Output, Input
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
-
-
 import dash_bootstrap_components as dbc
+from models.Stock import Stock
 
-
-
-from  models.Stock import Stock
-dash.register_page(__name__,path='/')
+dash.register_page(__name__, path='/')
 tickers = ['AAPL', 'GOOG', 'MSFT']  # Replace with your list of tickers
-features = ['SMA', 'EMA']  # Add other features as needed
-
+lines = ['Close','Open','High', 'Low']  # Add other features as needed
 
 layout = html.Div([
     dbc.Container([
@@ -24,60 +19,38 @@ layout = html.Div([
         dbc.Row([
             dbc.Col([
                 dcc.Dropdown(tickers, tickers[0], id='ticker-selection'),
-                html.Label('Select Features:', className='mt-3'),
-                dcc.Checklist(
-                    features,
-                    [],
-                    id='feature-selection',
-                    inline=True
+                                dcc.Checklist(
+                    lines,
+                    ['Close'],  # Default checked values
+                    id='selected_lines',
+                    inline=True,
+                    inputStyle={"margin-right": "5px", "margin-left": "10px"}  # Adding padding
                 ),
-                html.Label('Cluster:', className='h5 mt-3'),
-                html.Br(),
-                html.Label('LABEL', className='mt-3'),
-                html.Br(),
-                html.Label('Recent Sentiment:', className='h5 mt-3'),
-                html.Br(),
-                html.Label('Bullish', className='mt-3'),
-                html.Br(),
-                dcc.Dropdown(['ARIMA', 'SARIMAX'], 'ARIMA', id='model-selection'),  # Dropdown for model selection
-
-                dbc.Button('Run forecast',id='forecast-button', n_clicks=0),
-
-                
-            ], width=3, lg={"size": 3},class_name='info-details'),
+            ], width=3, lg={"size": 3}, class_name='info-details'),
             dbc.Col([
                 dcc.Graph(id='stock-graph')
-            ],width=8, lg={"size": 9})
-        ],
-         
-        justify='center', ),
-
-    ], fluid=True,className='max-width-container')
+            ], width=8, lg={"size": 9})
+        ], justify='center'),
+    ], fluid=True, className='max-width-container')
 ])
+
 @callback(
     Output('stock-graph', 'figure'),
     [Input('ticker-selection', 'value'),
-     Input('feature-selection', 'value'),
-     Input('model-selection', 'value'),  # Input for model selection
-     Input('forecast-button', 'n_clicks')]
+     Input('selected_lines', 'value')]
 )
-def update_graph(ticker, selected_features, selected_model, n_clicks):
+def update_graph(ticker,selected_lines):
     stock = Stock(ticker)
-
-    # Add selected features to the stock data
-    if 'SMA' in selected_features:
-        sma = stock.calculate_sma(20)  # Example window size
-        stock.data['SMA'] = sma  # Ensure SMA is added to the DataFrame
-    if 'EMA' in selected_features:
-        ema = stock.calculate_ema(20)  # Example window size
-        stock.data['EMA'] = ema  # Ensure EMA is added to the DataFrame
-
     df = stock.get_data()
 
+    fig = go.Figure()
 
+    for feature in selected_lines:
+        if feature in df.columns:
+            fig.add_trace(go.Scatter(x=df.index, y=df[feature], mode='lines', name=feature))
 
-    fig = px.line(df, x=df.index, y=df['Close'], title='Time Series with Range Slider and Selectors')
-
+    # Update layout and range selectors
+    fig.update_layout(title=f'Stock Data for {ticker}', xaxis_title='Date', yaxis_title='Price')
     fig.update_xaxes(
         rangeslider_visible=True,
         rangeselector=dict(
@@ -91,23 +64,4 @@ def update_graph(ticker, selected_features, selected_model, n_clicks):
         )
     )
 
-
-    # Add lines for each selected feature
-    for feature in selected_features:
-        if feature in df.columns:
-            fig.add_trace(go.Scatter(x=df.index, y=df[feature], mode='lines', name=feature))
-        if n_clicks > 0:
-            if selected_model == 'ARIMA':
-                # Fit and forecast using ARIMA (example: order (1, 1, 1))
-                model = stock.fit_arima(order=(1, 1, 1))
-            elif selected_model == 'SARIMAX':
-                # Fit and forecast using SARIMAX (example: order and seasonal_order)
-                model = stock.fit_sarimax(order=(1, 1, 1), seasonal_order=(1, 1, 1, 7))
-            
-        forecast = model.forecast(steps=7)  # Forecasting for a week
-        future_dates = pd.date_range(start=df.index[-1], periods=8, closed='right')
-        fig.add_trace(go.Scatter(x=future_dates, y=forecast, mode='lines', name='Forecast'))
-
-    # ... [rest of the update_gr
-    fig.update_layout(title=f'Stock Data for {ticker}', xaxis_title='Date', yaxis_title='Price')
     return fig

@@ -2,7 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-
+import plotly.graph_objects as go
+import numpy as np
 
 class Stock:
     def __init__(self, ticker, start_date='2010-01-01', end_date=None):
@@ -88,31 +89,56 @@ class Stock:
         plt.show()
 
     def fit_arima(self, order):
-        """
-        Fits an ARIMA model to the stock's close price data.
-
-        Parameters:
-        order (tuple): The (p, d, q) order of the ARIMA model.
-
-        Returns:
-        ARIMAResults: The fitted ARIMA model.
-        """
-
-        model = ARIMA(self.data["Close"], order=order)
+        model = ARIMA(self.data['Close'], order=order)
         self.arima_model = model.fit()
         return self.arima_model
 
     def fit_sarimax(self, order, seasonal_order):
-        """
-        Fits a SARIMAX model to the stock's close price data.
-
-        Parameters:
-        order (tuple): The (p, d, q) order of the model.
-        seasonal_order (tuple): The (P, D, Q, s) seasonal order of the model.
-
-        Returns:
-        SARIMAXResults: The fitted SARIMAX model.
-        """
-        model = SARIMAX(self.data["Close"], order=order, seasonal_order=seasonal_order)
+        model = SARIMAX(self.data['Close'], order=order, seasonal_order=seasonal_order)
         self.sarimax_model = model.fit()
         return self.sarimax_model
+
+    def get_forecast(self, model_type, steps=7):
+            if model_type == 'ARIMA' and self.arima_model:
+                forecast = self.arima_model.get_forecast(steps=steps)
+            elif model_type == 'SARIMAX' and self.sarimax_model:
+                forecast = self.sarimax_model.get_forecast(steps=steps)
+            else:
+                raise ValueError("Model not fitted or unknown model type.")
+
+            # Ensure the data index is in datetime format
+            last_date = self.data.index[-1]
+
+            if isinstance(last_date, pd.Period):
+                last_date = last_date.to_timestamp()
+
+            # Generate future dates for the forecast
+            # Adjusted to not use the 'closed' parameter
+            future_dates = pd.date_range(start=last_date, periods=steps + 1, freq='D')[1:]
+            
+            forecast_df = pd.DataFrame({
+                'ds': future_dates,
+                'yhat': forecast.predicted_mean.values,
+                'yhat_lower': forecast.conf_int().iloc[:, 0].values,
+                'yhat_upper': forecast.conf_int().iloc[:, 1].values
+            })
+            return forecast_df
+    def plot_with_forecast(self, forecast_df, model_type):
+        fig = go.Figure()
+
+        # Plot historical data
+        fig.add_trace(go.Scatter(x=self.data.index, y=self.data['Close'], mode='lines', name='Close Price'))
+
+        # Plot SMA and EMA if calculated
+        for feature_name, feature_data in self.features.items():
+            fig.add_trace(go.Scatter(x=self.data.index, y=feature_data, mode='lines', name=feature_name))
+
+        fig.add_trace(go.Scatter(x=forecast_df['ds'], y=forecast_df['yhat'], mode='lines', name=f'{model_type} Forecast'))
+        fig.add_trace(go.Scatter(x=forecast_df['ds'], y=forecast_df['yhat_upper'], fill='tonexty', mode='lines', line=dict(width=0), name=f'{model_type} Upper Bound'))
+        fig.add_trace(go.Scatter(x=forecast_df['ds'], y=forecast_df['yhat_lower'], fill='tonexty', mode='lines', line=dict(width=0), name=f'{model_type} Lower Bound'))
+
+            # Update layout
+        fig.update_layout(title=f'Stock Data and {model_type} Forecast for {self.ticker}', xaxis_title='Date', yaxis_title='Price')
+        fig.show()
+
+

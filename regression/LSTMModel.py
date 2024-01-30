@@ -205,3 +205,17 @@ class LSTMModel:
             results.append({'params': params, 'mse': mse_score, 'mape': mape_score})
 
         return results
+    
+    def forecast(self, steps=7):
+        if self.model is None:
+            raise Exception("Model is not built or trained.")
+
+        forecast_inputs = self.X_test[-1:]  # Use the last observation to make future predictions
+        forecasted_values = []
+        for _ in range(steps):
+            prediction = self.model.predict(forecast_inputs)
+            forecasted_values.append(prediction[0][0])
+            # Update forecast_inputs with the new prediction
+            forecast_inputs = np.append(forecast_inputs[:, 1:, :], prediction.reshape(-1, 1, 1), axis=1)
+
+        return np.array(forecasted_values)

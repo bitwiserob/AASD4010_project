@@ -5,7 +5,7 @@ import seaborn as sns
 import datetime as dt
 from sklearn.preprocessing import MinMaxScaler
 def single_preprocessing(ticker='SPLK', drop_col='Close', delay=15, lag=0):
-    df = pd.read_pickle("../data/data_pkls/nasdaq100.pkl") #read data
+    df = pd.read_pickle("data/data_pkls/nasdaq100.pkl") #read data
     #Filter dataframe by this specific ticker
     df = df[ticker]
     #Drop missing values since there is no good way to estimate stock values that are not tracked

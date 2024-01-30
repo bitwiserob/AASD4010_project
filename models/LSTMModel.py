@@ -1,4 +1,5 @@
 # lstm_model.py
+from keras.models import load_model
 import matplotlib.pyplot as plt
 import numpy as np
 from keras.models import Sequential
@@ -7,7 +8,7 @@ from keras.layers import Dropout
 from scikeras.wrappers import KerasRegressor
 from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
-from single_preprocessing_function import single_preprocessing
+from regression.single_preprocessing_function import single_preprocessing
 import itertools
 
 class LSTMModel:
@@ -47,8 +48,9 @@ class LSTMModel:
         X, y, _, _, _ = single_preprocessing(ticker=self.ticker, delay=self.delay, lag=self.lag)
 
         # Splitting data into train, test, and validation sets
-        self.X_train, self.X_test, self.y_train, self.y_test, self.X_val, self.y_val = self.check_dimensions_and_split_data(X, y)
-
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train, test_size=0.2, random_state=42)
+    
     def build_lstm_model(self, learning_rate=0.02, optimizer_choice='sgd' ):
         """
         Builds and returns an LSTM model based on the class parameters for units and dropout rate.
@@ -205,3 +207,45 @@ class LSTMModel:
             results.append({'params': params, 'mse': mse_score, 'mape': mape_score})
 
         return results
+    
+    def forecast(self, steps=7):
+            if self.model is None or self.X_test is None:
+                raise Exception("Model is not built, trained, or data is not preprocessed.")
+
+            forecast_inputs = self.X_test[-1:]  # Last sequence from X_test
+            forecasted_values = []
+
+            for _ in range(steps):
+                prediction = self.model.predict(forecast_inputs)[0, 0]
+                forecasted_values.append(prediction)
+
+                # Create a new timestep with the prediction
+                new_timestep = np.append(forecast_inputs[0, -1, :-1], prediction)  # Append prediction
+                
+                # Reshape new_timestep to [1, 1, features]
+                new_timestep_reshaped = new_timestep.reshape(1, 1, forecast_inputs.shape[2])
+
+                # Update the input sequence
+                forecast_inputs = np.append(forecast_inputs[:, 1:, :], new_timestep_reshaped, axis=1)
+
+            return np.array(forecasted_values)
+    def save_model(self, filepath):
+        """
+        Saves the trained LSTM model to a file.
+
+        Parameters:
+        filepath (str): The path to save the model file.
+        """
+        if self.model:
+            self.model.save(filepath)
+        else:
+            raise Exception("No model to save. Train the model before saving.")
+        
+    def load_model(self, filepath):
+        """
+        Loads an LSTM model from a file.
+
+        Parameters:
+        filepath (str): The path to the model file to be loaded.
+        """
+        self.model = load_model(filepath)
