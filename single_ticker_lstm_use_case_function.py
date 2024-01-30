@@ -12,35 +12,40 @@ import matplotlib.pyplot as plt
 import numpy as np
 import keras
 
-def single_ticker_LSTM_regression(ticker='DXCM', delay=5, lag=0):
+def single_ticker_lstm_use_case(ticker='DXCM', delay=5, lag=0, verbose=1):
     keras.utils.set_random_seed(97) #Set seed for reproducibility
     #get pre processed data using our previous built function
     X, y, ticker, delay, lag = single_preprocessing(ticker=ticker, delay=delay, lag=lag)
 
     #Confirm selected ticker
-    print("Executing RNN-LSTM for selected ticker :",ticker)
-    print("\n")
-    print("delay :",delay," lag :",lag)
-    print("\n")
+    if verbose == 1:
+        print("Executing RNN-LSTM for selected ticker :",ticker)
+        print("\n")
+        print("delay :",delay," lag :",lag)
+        print("\n")
 
     #dimentional check
     if X.shape[0] > y.shape[0]:
         X = X[:-1]
-        print("Dimentional adjustment for X performed")
+        if verbose == 1:
+            print("Dimentional adjustment for X performed")
     else:
-        print("Dimension check passsed")
+        if verbose == 1:
+            print("Dimension check passsed")
 
     #Confirm shapes of X and y
-    print("\n")
-    print("Shape of X :")
-    print(X.shape)
-    print("\n")
-    print("Shape of y :")
-    print(y.shape)
-    print("\n")
+    if verbose == 1:
+        print("\n")
+        print("Shape of X :")
+        print(X.shape)
+        print("\n")
+        print("Shape of y :")
+        print(y.shape)
+        print("\n")
 
     if X.shape[0] == y.shape[0]:
-        print("2nd Dimension check passed")
+        if verbose == 1:
+            print("2nd Dimension check passed")
     else:
         assert X.shape[0] == y.shape[0], "The number of observations for X and y should be the same"
     print("\n")
@@ -59,29 +64,10 @@ def single_ticker_LSTM_regression(ticker='DXCM', delay=5, lag=0):
     #Compile model and fit
     optimizer = optimizers.SGD(learning_rate=0.001, momentum=0.0, nesterov=False)
     lstm_model.compile(optimizer=optimizer, loss='mean_squared_error')
-    lstm_history = lstm_model.fit(X_train, y_train, epochs=190, batch_size=30, validation_data=(X_val, y_val))
+    lstm_history = lstm_model.fit(X_train, y_train, epochs=190, batch_size=30, validation_data=(X_val, y_val), verbose=verbose)
 
-    #Plot training and validation loss
-    loss = lstm_history.history['loss']
-    val_loss = lstm_history.history['val_loss']
-    epochs = range(1, len(loss) + 1)
-    plt.figure()
-    plt.plot(epochs, loss, 'bo', label='Training loss')
-    plt.plot(epochs, val_loss, 'b', label='Validation loss')
-    plt.xlabel('Epochs')
-    plt.title('Training and validation loss '+ticker)
-    plt.legend()
-    plt.show()
-
-    #Make predictions and plot with correct values
+    #Make predictions
     predicted_stock_price = lstm_model.predict(X_test)
-    plt.plot(y_test, color='red', label='Real Stock Price')
-    plt.plot(predicted_stock_price, color='blue', label='Predicted Stock Price')
-    plt.title('Stock Price Prediction RNN '+ticker)
-    plt.xlabel('Time')
-    plt.ylabel('Stock Price')
-    plt.legend()
-    plt.show()
 
     #Evaluate model
     #Evaluate regression model using mse and map
@@ -90,3 +76,5 @@ def single_ticker_LSTM_regression(ticker='DXCM', delay=5, lag=0):
     print("\n")
     print("MAPE for model: ")
     print(mean_absolute_percentage_error(y_test, predicted_stock_price))
+
+    return lstm_model, ticker, delay
