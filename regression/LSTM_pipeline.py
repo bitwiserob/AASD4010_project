@@ -23,7 +23,7 @@ def preprocess_data(ticker='DXCM', delay=5, lag=0):
     delay (int): The delay parameter for preprocessing.
     lag (int): The lag parameter for preprocessing.
 
-    Returns:
+Returns:
     tuple: Processed X, y data and other necessary information.
     """
     # Here, we'll insert the existing preprocessing logic from the original function

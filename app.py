@@ -23,6 +23,8 @@ navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Stock Data", href="/")),  # Add link here
         dbc.NavItem(dbc.NavLink("Clustering", href="/clustering")),  # Add link here
+        dbc.NavItem(dbc.NavLink("Sentiment", href="/Sentiment")),  # Add link here
+
         dbc.NavItem(dbc.NavLink("Models", href="/models")),  # Add link here
 
     ],
