@@ -8,8 +8,10 @@ from keras.optimizers import RMSprop
 
 import matplotlib.pyplot as plt
 import numpy as np
+import keras
 
 def single_ticker_baseline_regression(ticker='DXCM', delay=5, lag=0):
+    keras.utils.set_random_seed(97) #Set seed for reproducibility
     #get pre processed data using our previous built function
     X, y, ticker, delay, lag = single_preprocessing(ticker=ticker, delay=delay, lag=lag)
 
