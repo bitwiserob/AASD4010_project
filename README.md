@@ -1,14 +1,12 @@
-# AASD4010_project
+## DL Stock Analysis
+  
+### Deep Learning 1 – AASD4010
+
+- . Rahul,
+- Bhatt Harsh Udaybhai,
+- Dossayeva Zarina,
+- Henao Barrios Juan,
+- Kaczur Robert,
+- Lopera Diana
 
 
-## Project Description
-
-This is currently in the data gathering stage
-
-
-### First run to install requirements
-
-pip install -r /path/to/requirements.txt
-
-
-### then go to preprocessing notebook
